@@ -19,12 +19,12 @@ class MicroMachine
     transitions_for[event] = transitions
   end
 
-  def trigger(event, payload = nil)
-    trigger?(event) and change(event, payload)
+  def trigger(event, *payload, **kwargs)
+    trigger?(event) and change(event, *payload, **kwargs)
   end
 
-  def trigger!(event, payload = nil)
-    trigger(event, payload) or
+  def trigger!(event, *payload, **kwargs)
+    trigger(event, *payload, **kwargs) or
       raise InvalidState.new("Event '#{event}' not valid from state '#{@state}'")
   end
 
@@ -47,10 +47,10 @@ class MicroMachine
 
 private
 
-  def change(event, payload = nil)
+  def change(event, *payload, **kwargs)
     @state = transitions_for[event][@state]
     callbacks = @callbacks[@state] + @callbacks[:any]
-    callbacks.each { |callback| callback.call(event, payload) }
+    callbacks.each { |callback| callback.call(event, *payload, **kwargs) }
     true
   end
 end

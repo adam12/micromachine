@@ -57,3 +57,33 @@ test "passing the payload from transition to the callbacks" do
 
   assert_equal({ foo: :bar }, received_payload)
 end
+
+test "accepting the payload as keyword arguments" do
+  received_payload = nil
+
+  machine = MicroMachine.new(:pending)
+  machine.when(:confirm, pending: :confirmed)
+
+  machine.on(:confirmed) do |_event, foo:, **|
+    received_payload = foo
+  end
+
+  machine.trigger(:confirm, foo: :bar)
+
+  assert_equal(:bar, received_payload)
+end
+
+test "triggering a plain value" do
+  received_payload = nil
+
+  machine = MicroMachine.new(:pending)
+  machine.when(:confirm, pending: :confirmed)
+
+  machine.on(:confirmed) do |_event, data|
+    received_payload = data
+  end
+
+  machine.trigger(:confirm, :bar)
+
+  assert_equal(:bar, received_payload)
+end
